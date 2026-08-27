@@ -9,3 +9,7 @@ async def receive_oauth_redirect(code: str | None = None):
     if code:
         data.update({"code": code})
     return data
+
+@app.get("/health/live/")
+async def receive_oauth_redirect():
+    return {"status": "ok"}
