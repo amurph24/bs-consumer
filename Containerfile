@@ -2,7 +2,7 @@ FROM python:3.12-slim@sha256:57cd7c3a7a273101a6485ba99423ee568157882804b1124b4dd
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    PYTHONPATH=/app/src \
+    PYTHONPATH=/app/src
 
 WORKDIR /app
 
@@ -13,7 +13,7 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 RUN python -m pip install --no-cache-dir --upgrade pip==26.1.2 \
-    && python -m pip install --no-cache-dir --require-hashes -r requirements.lock
+    && python -m pip install --no-cache-dir -r requirements.txt
 
 COPY src /app/src
 
