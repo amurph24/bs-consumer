@@ -1,0 +1,103 @@
+"""Drawn Largely from bsapi: https://github.com/JobDoesburg/bsapi ."""
+import requests
+import urllib.parse
+
+
+DEFAULT_TIMEOUT = (10, 60)
+
+BS_OAUTH_AUTH_URL = "https://auth.brightspace.com/oauth2/auth"
+BS_OAUTH_TOKEN_URL = "https://auth.brightspace.com/core/connect/token"
+
+
+def create_auth_url(
+    client_id: str,
+    redirect_uri: str,
+    scope: str,
+    auth_url: str = BS_OAUTH_AUTH_URL,
+) -> str:
+    """Create OAuth 2.0 authorization URL.
+
+    :param auth_url: Override the default Brightspace authorization endpoint.
+    """
+    params = {
+        "response_type": "code",
+        "client_id": client_id,
+        "redirect_uri": redirect_uri,
+        "scope": scope,
+    }
+    query = urllib.parse.urlencode(params)
+    return f"{auth_url}?{query}"
+
+
+def exchange_code_for_token(
+    client_id: str,
+    client_secret: str,
+    redirect_uri: str,
+    authorization_code: str,
+    token_url: str = BS_OAUTH_TOKEN_URL,
+    timeout: float | tuple[float, float] | None = DEFAULT_TIMEOUT,
+    session: requests.Session | None = None,
+) -> dict:
+    """Exchange authorization code for access token using explicit form encoding.
+
+    :param token_url: Override the default Brightspace token endpoint.
+    :param timeout: Request timeout forwarded to `requests`.
+    :param session: A pre-configured `requests.Session` to use. If `None`, a one-off `requests.post` is made.
+    """
+    data = {
+        "grant_type": "authorization_code",
+        "code": authorization_code,
+        "redirect_uri": redirect_uri,
+        "client_id": client_id,
+        "client_secret": client_secret,
+    }
+
+    poster = session.post if session is not None else requests.post
+    try:
+        response = poster(token_url, data=data, timeout=timeout)
+    except requests.exceptions.RequestException as e:
+        raise RuntimeError(f"Token exchange failed due to request exception: {e}")
+
+    if response.status_code != 200:
+        raise RuntimeError(
+            f"Token exchange failed: {response.status_code}: {response.text}",
+            response=response,
+        )
+
+    return response.json()
+
+
+def refresh_access_token(
+    client_id: str,
+    client_secret: str,
+    refresh_token: str,
+    token_url: str = BS_OAUTH_TOKEN_URL,
+    timeout: float | tuple[float, float] | None = DEFAULT_TIMEOUT,
+    session: requests.Session | None = None,
+) -> dict:
+    """Exchange refresh token for access token using explicit form encoding.
+
+    :param token_url: Override the default Brightspace token endpoint.
+    :param timeout: Request timeout forwarded to `requests`.
+    :param session: A pre-configured `requests.Session` to use. If `None`, a one-off `requests.post` is made.
+    """
+    data = {
+        "grant_type": "refresh_token",
+        "refresh_token": refresh_token,
+        "client_id": client_id,
+        "client_secret": client_secret,
+    }
+
+    poster = session.post if session is not None else requests.post
+    try:
+        response = poster(token_url, data=data, timeout=timeout)
+    except requests.exceptions.RequestException as e:
+        raise RuntimeError(f"Token refresh failed due to request exception: {e}")
+
+    if response.status_code != 200:
+        raise RuntimeError(
+            f"Token refresh failed: {response.status_code}: {response.text}",
+            response=response,
+        )
+
+    return response.json()
