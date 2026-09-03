@@ -7,7 +7,7 @@ from local_bs_api import exchange_code_for_token, create_auth_url
 app = FastAPI()
 
 
-@app.get("/")
+@app.get("/access/")
 async def authcode_to_accesstoken(code: str | None = None) -> dict[str, str]:
     """Accept an authorization code and return an access token."""
     data = {}
@@ -38,6 +38,6 @@ async def redirect_authurl():
 
 
 @app.get("/health/live/")
-async def health_check():
+async def health_check() -> dict[str, str]:
     """Quick confirmation that the server is alive."""
     return {"status": "ok"}
