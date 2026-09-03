@@ -1,1 +1,1 @@
-# bs-provisioner
+# bs-consumer
