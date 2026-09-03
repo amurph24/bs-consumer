@@ -28,7 +28,7 @@ async def authcode_to_accesstoken(code: str | None = None) -> dict[str, str]:
 async def redirect_authurl():
     """Redirect users to authenticate and authorise the access."""
     # hardcoded
-    scope = "dropbox:folders:read,write enrollment:orgunit:read enrollment:own_enrollment:read grades:gradeobjects:read grades:gradevalues:write"
+    scope = "dropbox:folders:read,write enrollment:orgunit:read enrollment:own_enrollment:read"
     auth_url = create_auth_url(
         Settings.client_id,
         Settings.redirect_uri,
